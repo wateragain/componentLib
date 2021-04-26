@@ -1,13 +1,11 @@
 package scanclass;
 
-import dependencyinjection.Autowired;
-import dependencyinjection.BeanNameAware;
-import dependencyinjection.Scope;
+import scanclass.dependencyinjection.Autowired;
+import scanclass.dependencyinjection.BeanNameAware;
+import scanclass.dependencyinjection.Scope;
 
 import java.io.File;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,22 +94,25 @@ public class ApplicationContext {
             if(beanDefinition.getScope().equals("singleton")){
                 //创建bean，注意在创建时会依赖注入可能重复创建
                 Object bean = doCreateBean(beanName, beanDefinition);
+                //放入单例池
                 singletonObjects.put(beanName, bean);
             }
         }
     }
 
+    //在BeanFactory里有这个方法
     public Object doCreateBean(String beanName, BeanDefinition beanDefinition){
         Object bean = null;
-        //1.实例化
+        //1.实例化(InstantiationAwareBeanPostProcessor.postProcessBeforeXXX--推断构造new对象--InstantiationAwareBeanPostProcessor.postProcessAfterXXX)
         Class beanClass = beanDefinition.getBeanClass();
-        //这里还要选择构造方法
+        //这里还要推断构造方法
         try {
             bean = beanClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //2.属性填充
+        //2.初始化(Aware--BeanPostProcessor.postProcessBeforeXXX--InitializingBean--BeanPostProcessor.postProcessAfterXXX--Aop)
+        //属性填充
         Field[] declaredFields = beanClass.getDeclaredFields();
         for (Field f : declaredFields) {
             if (f.isAnnotationPresent(Autowired.class)) {
@@ -127,13 +128,15 @@ public class ApplicationContext {
             }
         }
         //3.Aware方法等其他你想在初始化时就执行的方法(InitializeBean,BeanPostProcessor等)
-        //或者if(BeanNameAware.class.isAssignableFrom(beanClass))
         if(bean instanceof BeanNameAware){
+        //或者if(BeanNameAware.class.isAssignableFrom(beanClass))
             ((BeanNameAware) bean).setBeanName(beanName);
         }
-        //BeanPostProcessor会在扫描时就将所有实现类放入list中
-        //在生成bean的时候循环调用所有的
+        //BeanPostProcessor会在扫描时就将所有实现类放入list中，在生成bean的时候循环调用所有的BeanPostProcessor
         //它有一个实现：AutowiredAnnotationBeanPostProcessor，所以其实Autowired的属性填充走的还是BeanPostProcessor
+        //而InitializeBean是让指定类继承的，只会影响这个类自身
+        //初始化后会进行aop
+
         return bean;
     }
 

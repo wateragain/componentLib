@@ -1,7 +1,6 @@
 package scanclass.test.service;
 
-import dependencyinjection.Autowired;
-import dependencyinjection.Scope;
+import scanclass.dependencyinjection.Autowired;
 import scanclass.Component;
 
 @Component

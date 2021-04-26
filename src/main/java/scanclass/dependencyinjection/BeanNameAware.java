@@ -1,4 +1,4 @@
-package dependencyinjection;
+package scanclass.dependencyinjection;
 
 public interface BeanNameAware {
 

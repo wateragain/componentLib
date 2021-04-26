@@ -1,4 +1,4 @@
-package dependencyinjection;
+package scanclass.dependencyinjection;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
