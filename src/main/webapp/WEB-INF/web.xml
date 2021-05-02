@@ -8,6 +8,10 @@
     <servlet>
         <servlet-name>water</servlet-name>
         <servlet-class>servlet.WaterServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:spring-servlet.xml</param-value>
+        </init-param>
     </servlet>
 
     <servlet-mapping>
